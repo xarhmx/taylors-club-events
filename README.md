@@ -84,7 +84,7 @@ images/       Logo, uploaded profile photos (images/profiles/)
 ## Team
 | Name | Role |
 |------|------|
-|      | Front-end |
-|      | Back-end |
-|      | UI/UX (Figma) |
-|      |  |
+| Ariz & Frank | Front-end |
+| Ariz & Hamza | Back-end |
+| Frank | UI/UX (Figma) |
+| Ariz & Hamza | Database |
