@@ -10,7 +10,7 @@ HTML, CSS, JavaScript, PHP 8, MySQL (MAMP + phpMyAdmin)
 1. Clone this repo into MAMP's `htdocs` folder.
 2. Start MAMP and open phpMyAdmin.
 3. Import `database/taylors_club_events.sql` (creates the database, tables and sample data).
-4. Check the database settings in `includes/config.php` (Windows MAMP port 3306, Mac MAMP usually 8889; user/password `root`).
+4. Check the database settings in `includes/config.php` (Windows MAMP port 3306`root`).
 5. Visit http://localhost/taylors-club-events/ (Mac: http://localhost:8888/taylors-club-events/).
 
 ## Test accounts
