@@ -4,23 +4,19 @@
    1.  Mobile navigation menu
    2.  Password fields (show/hide, "passwords match" check)
    3.  Pop-ups (club details, event details, add/edit event)
-   4.  Forms: delete confirmation + demo mode
+   4.  Forms: delete confirmation + messages from the server
    5.  Club category filter (clubs page)
    6.  Organiser: edit club details in place (clubs page)
    7.  Profile photo pop-up (edit profile page)
    8.  Event calendar (calendar page)
    ============================================================ */
 
-// While the back-end is not ready, forms that point to actions/*.php are
-// NOT sent. Instead the page just shows what would happen (e.g. the Follow
-// button changes). When the PHP files in actions/ work, set this to false.
-const FRONTEND_ONLY = true;
-
 document.addEventListener('DOMContentLoaded', function () {
     initMobileMenu();
     initPasswordFields();
     initPopups();
     initForms();
+    initFlash();
     initClubFilter();
     initClubEditing();
     initPhotoPopup();
@@ -129,64 +125,31 @@ function initForms() {
     document.addEventListener('submit', function (event) {
         const form = event.target;
 
-        // "Are you sure?" for deleting
+        // "Are you sure?" before deleting
         if (form.dataset.confirm && !window.confirm(form.dataset.confirm)) {
             event.preventDefault();
             return;
         }
 
-        // Only forms that go to actions/*.php are affected by demo mode
-        if (!FRONTEND_ONLY || !form.getAttribute('action').startsWith('actions/')) return;
-        event.preventDefault();
-
-        if (form.classList.contains('follow-form')) {
-            demoFollow(form);
-        } else if (form.classList.contains('rsvp-form')) {
-            demoRsvp(form);
-        } else if (form.classList.contains('club-edit-form')) {
-            demoSaveClub(form);
-        } else {
-            showToast('Looks good! This will be saved once the back-end is connected.');
-            const popup = form.closest('dialog');
-            if (popup) popup.close();
+        // Stop double-clicks sending the same form twice
+        const button = form.querySelector('button[type="submit"]');
+        if (button) {
+            setTimeout(() => { button.disabled = true; }, 0);
         }
     });
 }
 
-function demoFollow(form) {
-    const button = form.querySelector('.btn-follow');
-    const actionInput = form.querySelector('input[name="action"]');
-    const nowFollowing = !button.classList.contains('is-following');
-
-    button.classList.toggle('is-following', nowFollowing);
-    button.textContent = nowFollowing ? 'Following ✓' : 'Follow+';
-    actionInput.value = nowFollowing ? 'unfollow' : 'follow';
-}
-
-function demoRsvp(form) {
-    const button = form.querySelector('.btn-rsvp');
-    const actionInput = form.querySelector('input[name="action"]');
-    const counter = form.closest('dialog').querySelector('.going-count');
-    const nowGoing = !button.classList.contains('is-going');
-
-    button.classList.toggle('is-going', nowGoing);
-    button.classList.toggle('btn-primary', !nowGoing);
-    button.textContent = nowGoing ? 'Going ✓ · Cancel RSVP' : 'RSVP';
-    actionInput.value = nowGoing ? 'cancel' : 'rsvp';
-    counter.textContent = Number(counter.textContent) + (nowGoing ? 1 : -1);
-    showToast(nowGoing ? "You're going! 🎉" : 'RSVP cancelled.');
-}
-
-function demoSaveClub(form) {
-    const card = form.closest('.club-card');
-    card.querySelector('.club-category .view-only').textContent = form.category.value;
-    card.querySelector('.club-description.view-only').textContent = form.description.value;
-    card.classList.remove('is-editing');
-    showToast('Club details updated.');
+// Shows the one-time message from PHP (e.g. "Event created!") and
+// re-opens the pop-up the user was using before the page reloaded.
+function initFlash() {
+    const data = document.getElementById('flashData');
+    if (!data) return;
+    if (data.dataset.message) showToast(data.dataset.message, data.dataset.type);
+    if (data.dataset.open) openPopup(data.dataset.open);
 }
 
 // Small message at the bottom of the screen
-function showToast(message) {
+function showToast(message, type) {
     let toast = document.querySelector('.toast');
     if (!toast) {
         toast = document.createElement('div');
@@ -195,9 +158,10 @@ function showToast(message) {
         document.body.appendChild(toast);
     }
     toast.textContent = message;
+    toast.classList.toggle('toast-error', type === 'error');
     toast.classList.add('show');
     clearTimeout(toast.hideTimer);
-    toast.hideTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+    toast.hideTimer = setTimeout(() => toast.classList.remove('show'), type === 'error' ? 5000 : 3000);
 }
 
 
@@ -311,8 +275,9 @@ function initCalendar() {
     const root = document.getElementById('calendar');
     if (!root) return;
 
-    // Events are printed by calendar.php into window.CALENDAR_EVENTS
-    const events = window.CALENDAR_EVENTS || [];
+    // Events are printed by calendar.php as JSON data in <script id="calendarData">
+    const dataTag = document.getElementById('calendarData');
+    const events = dataTag ? JSON.parse(dataTag.textContent) : [];
 
     const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
                     'August', 'September', 'October', 'November', 'December'];

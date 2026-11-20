@@ -8,33 +8,30 @@
  *     photo or delete the current one
  * Everything is sent to actions/update_profile.php
  * (multipart/form-data is needed for file uploads).
+ * Errors come back as a flash message (top of the page).
  * ------------------------------------------------------------
  */
 $pageTitle  = 'Edit Profile';
 $activePage = 'profile';
 
 require 'includes/functions.php';
-require 'includes/sample_data.php';   // TODO (back-end): replace with database queries
+require 'includes/data.php';             // loads everything from the database
 
-$user    = $currentUser;
+$user    = requireLogin();   // guests are sent to the login page
 $myClubs = clubsWithPositions($clubs, $clubMembers, $followedClubIds, $user['user_id']);
-$error   = $_GET['error'] ?? '';
 
 require 'includes/header.php';
 ?>
 
 <div class="container">
     <form action="actions/update_profile.php" method="POST" enctype="multipart/form-data" id="editProfileForm">
+        <?= csrfField() ?>
 
         <div class="profile-title-row animate">
             <h1 class="page-title">Profile</h1>
             <a href="profile.php" class="btn btn-outline btn-sm">Cancel</a>
             <button type="submit" class="btn btn-dark btn-sm">Save your changes</button>
         </div>
-
-        <?php if ($error !== ''): ?>
-            <div class="alert alert-error"><?= e($error) ?></div>
-        <?php endif; ?>
 
         <section class="profile-header animate" style="--i: 1">
 

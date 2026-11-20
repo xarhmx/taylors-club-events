@@ -12,7 +12,7 @@ $pageTitle  = 'Clubs';
 $activePage = 'clubs';
 
 require 'includes/functions.php';
-require 'includes/sample_data.php';   // TODO (back-end): replace with database queries
+require 'includes/data.php';             // loads everything from the database
 require 'includes/event_form.php';
 
 // Show the organiser's own club(s) first
@@ -59,6 +59,8 @@ require 'includes/header.php';
                     <!-- ORGANISER VIEW: the details can be edited in place.
                          Sent to actions/update_club.php -->
                     <form class="club-edit-form" action="actions/update_club.php" method="POST">
+                        <?= csrfField() ?>
+                        <?= returnField() ?>
                         <input type="hidden" name="club_id" value="<?= $clubId ?>">
                         <div class="club-content">
                             <div class="club-avatar club-image" style="--hue: <?= clubHue($clubId) ?>"><?= initials($club['club_name']) ?></div>
@@ -89,8 +91,7 @@ require 'includes/header.php';
                 <?php else: ?>
                     <!-- STUDENT VIEW -->
                     <div class="club-content">
-                        <!-- Placeholder image. With real images use:
-                             <img src="images/clubs/<?= e($club['image'] ?? '') ?>" alt=""> inside this div -->
+                        <!-- Placeholder image (club initials). Real club images could go in images/clubs/ -->
                         <div class="club-avatar club-image" style="--hue: <?= clubHue($clubId) ?>"><?= initials($club['club_name']) ?></div>
                         <div class="club-info">
                             <p class="club-category">Category: <span class="badge"><?= e($club['category']) ?></span></p>
@@ -101,14 +102,20 @@ require 'includes/header.php';
                     <div class="club-actions">
                         <button type="button" class="btn btn-outline btn-sm" data-open="club-<?= $clubId ?>">View Details</button>
 
-                        <!-- Sent to actions/follow_club.php -->
-                        <form class="follow-form" action="actions/follow_club.php" method="POST">
-                            <input type="hidden" name="club_id" value="<?= $clubId ?>">
-                            <input type="hidden" name="action" value="<?= $isFollowing ? 'unfollow' : 'follow' ?>">
-                            <button type="submit" class="btn btn-outline btn-sm btn-follow<?= $isFollowing ? ' is-following' : '' ?>">
-                                <?= $isFollowing ? 'Following ✓' : 'Follow+' ?>
-                            </button>
-                        </form>
+                        <?php if ($currentUser === null): ?>
+                            <a href="login.php" class="btn btn-outline btn-sm">Follow+</a>
+                        <?php else: ?>
+                            <!-- Sent to actions/follow_club.php -->
+                            <form class="follow-form" action="actions/follow_club.php" method="POST">
+                                <?= csrfField() ?>
+                                <?= returnField() ?>
+                                <input type="hidden" name="club_id" value="<?= $clubId ?>">
+                                <input type="hidden" name="action" value="<?= $isFollowing ? 'unfollow' : 'follow' ?>">
+                                <button type="submit" class="btn btn-outline btn-sm btn-follow<?= $isFollowing ? ' is-following' : '' ?>">
+                                    <?= $isFollowing ? 'Following ✓' : 'Follow+' ?>
+                                </button>
+                            </form>
+                        <?php endif; ?>
                     </div>
                 <?php endif; ?>
             </article>

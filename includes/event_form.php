@@ -11,9 +11,13 @@
 
 function eventFormDialog($dialogId, $clubId, $event = null)
 {
+    global $oldInput;
     $isEdit = $event !== null;
     $action = $isEdit ? 'actions/update_event.php' : 'actions/create_event.php';
-    $value  = fn($key) => $isEdit ? e($event[$key]) : '';
+
+    // After a form error, refill what the organiser typed; otherwise use the event's values
+    $old    = (($oldInput['form'] ?? '') === $dialogId) ? $oldInput : null;
+    $value  = fn($key) => e($old[$key] ?? ($isEdit ? $event[$key] : ''));
     $minDate = $isEdit ? '' : 'min="' . date('Y-m-d') . '"';   // can't create events in the past
     ?>
     <dialog class="popup popup-form" id="<?= e($dialogId) ?>" aria-labelledby="<?= e($dialogId) ?>-title">
@@ -21,6 +25,8 @@ function eventFormDialog($dialogId, $clubId, $event = null)
         <h2 class="popup-title" id="<?= e($dialogId) ?>-title"><?= $isEdit ? 'Edit Event' : 'New Event' ?></h2>
 
         <form action="<?= $action ?>" method="POST" class="popup-fields">
+            <?= csrfField() ?>
+            <?= returnField() ?>
             <input type="hidden" name="club_id" value="<?= (int) $clubId ?>">
             <?php if ($isEdit): ?>
                 <input type="hidden" name="event_id" value="<?= (int) $event['event_id'] ?>">

@@ -1,0 +1,2 @@
+# The database dump must never be downloadable.
+Require all denied

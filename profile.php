@@ -10,9 +10,9 @@ $pageTitle  = 'Profile';
 $activePage = 'profile';
 
 require 'includes/functions.php';
-require 'includes/sample_data.php';   // TODO (back-end): replace with database queries
+require 'includes/data.php';             // loads everything from the database
 
-$user       = $currentUser;
+$user       = requireLogin();   // guests are sent to the login page
 $myClubs    = clubsWithPositions($clubs, $clubMembers, $followedClubIds, $user['user_id']);
 $myEvents   = array_filter($events, fn($ev) => in_array($ev['event_id'], $rsvpEventIds));
 $myUpcoming = upcomingEvents($myEvents);
@@ -26,7 +26,10 @@ require 'includes/header.php';
     <div class="profile-title-row animate">
         <h1 class="page-title">Profile</h1>
         <a href="edit_profile.php" class="btn btn-outline btn-sm">Edit Profile</a>
-        <a href="logout.php" class="btn btn-dark btn-sm">Log out</a>
+        <form action="logout.php" method="POST" class="inline-form">
+            <?= csrfField() ?>
+            <button type="submit" class="btn btn-dark btn-sm">Log out</button>
+        </form>
     </div>
 
     <!-- User info -->

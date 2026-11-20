@@ -1,0 +1,2 @@
+# Code-only folder: these files are loaded by PHP, never opened in a browser.
+Require all denied

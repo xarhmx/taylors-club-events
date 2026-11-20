@@ -1,0 +1,39 @@
+# ============================================================
+# Taylor's Club Events - Apache settings
+# MAMP runs Apache, which reads this file automatically.
+# ============================================================
+
+# ---- 1. Don't list folder contents ----
+# Visiting /includes/ or /images/ shows "Forbidden" instead of a file list.
+Options -Indexes
+DirectoryIndex index.php
+
+# ---- 2. Block files that must never be downloaded ----
+# (the database dump, readme, git settings, logs ...)
+<FilesMatch "\.(sql|md|log|ini|bak|txt)$|^\.git">
+    Require all denied
+</FilesMatch>
+RedirectMatch 404 /\.git
+
+# ---- 3. CACHE: let browsers keep static files ----
+# CSS/JS/images rarely change, so the browser stores them and the site
+# loads faster. When a CSS/JS file changes, its link gets a new ?v=...
+# (see asset() in includes/header.php) so the new version is fetched.
+# PHP pages are NOT cached (see includes/auth.php).
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css               "access plus 7 days"
+    ExpiresByType application/javascript "access plus 7 days"
+    ExpiresByType text/javascript        "access plus 7 days"
+    ExpiresByType image/png              "access plus 30 days"
+    ExpiresByType image/jpeg             "access plus 30 days"
+    ExpiresByType image/svg+xml          "access plus 30 days"
+</IfModule>
+
+<IfModule mod_headers.c>
+    <FilesMatch "\.(css|js|png|jpe?g|svg)$">
+        Header set Cache-Control "public, max-age=604800"
+    </FilesMatch>
+    # Don't reveal the PHP version
+    Header always unset X-Powered-By
+</IfModule>

@@ -11,11 +11,11 @@ $pageTitle  = 'Home';
 $activePage = 'home';
 
 require 'includes/functions.php';
-require 'includes/sample_data.php';   // TODO (back-end): replace with database queries
+require 'includes/data.php';             // loads everything from the database
 
 $featuredClubs  = array_slice($clubs, 0, 5);
 $upcoming       = array_slice(upcomingEvents($events), 0, 5);
-$followingClubs = array_filter($clubs, fn($c) => in_array($c['club_id'], $followedClubIds));
+$followingClubs = array_filter($clubs, fn($c) => in_array($c['club_id'], $followedClubIds));   // empty for guests
 
 require 'includes/header.php';
 ?>
@@ -88,8 +88,10 @@ require 'includes/header.php';
         <section class="card animate" style="--i: 3">
             <h2 class="card-title">Following Clubs &amp; Societies</h2>
             <div class="card-body">
-                <?php if (empty($followingClubs)): ?>
-                    <p class="empty-state">You aren't following any clubs yet.</p>
+                <?php if ($currentUser === null): ?>
+                    <p class="empty-state"><a class="text-link" href="login.php">Log in</a> to see the clubs you follow.</p>
+                <?php elseif (empty($followingClubs)): ?>
+                    <p class="empty-state">You aren't following any clubs yet. <a class="text-link" href="clubs.php">Browse clubs →</a></p>
                 <?php else: ?>
                     <ul class="item-list">
                         <?php foreach ($followingClubs as $club): ?>

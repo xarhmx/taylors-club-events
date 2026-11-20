@@ -11,7 +11,7 @@ $pageTitle  = 'Calendar';
 $activePage = 'calendar';
 
 require 'includes/functions.php';
-require 'includes/sample_data.php';   // TODO (back-end): replace with database queries
+require 'includes/data.php';             // loads everything from the database
 
 // Prepare the events for JavaScript (only the fields the calendar needs)
 $calendarEvents = [];
@@ -75,10 +75,9 @@ require 'includes/header.php';
     </div>
 </div>
 
-<!-- Pass the PHP events to JavaScript -->
-<script>
-    window.CALENDAR_EVENTS = <?= json_encode($calendarEvents, JSON_HEX_TAG | JSON_HEX_AMP) ?>;
-</script>
+<!-- Pass the PHP events to JavaScript as data (not code), so the
+     Content Security Policy can block all inline scripts -->
+<script type="application/json" id="calendarData"><?= json_encode($calendarEvents, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?></script>
 
 <?php require 'includes/event_modals.php'; ?>
 

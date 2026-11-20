@@ -1,0 +1,5 @@
+# Uploaded profile photos only. Even if someone uploads a script
+# disguised as a photo, it can never run from this folder.
+<FilesMatch "\.(php\d?|phtml|phar|pl|py|cgi|sh|html?|js)$">
+    Require all denied
+</FilesMatch>

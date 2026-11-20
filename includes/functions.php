@@ -32,7 +32,7 @@ function eventsForClub($events, $clubId)
 // Is this user the organiser of this club?
 function isOrganiserOf($club, $user)
 {
-    return $user['role'] === 'organiser' && $club['organiser_id'] == $user['user_id'];
+    return $user !== null && $user['role'] === 'organiser' && $club['organiser_id'] == $user['user_id'];
 }
 
 // Turn "Computer Science Society" into "CS" (used for placeholder club images)

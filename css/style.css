@@ -283,6 +283,7 @@ ul {
 
 .nav-auth {
     justify-self: end;
+    margin: 0;
 }
 
 /* Hamburger (hidden on desktop) */
@@ -646,6 +647,30 @@ a.item-row:hover {
     padding: 10px 14px;
     border-radius: var(--radius-sm);
     font-size: .9rem;
+}
+
+.alert-success {
+    background: #e9f7ef;
+    color: #17663a;
+    border: 1px solid #a7dcbc;
+}
+
+/* "Remember me" checkbox on the login page */
+.remember-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: -6px;
+    font-size: .9rem;
+    color: var(--ink-soft);
+    cursor: pointer;
+}
+
+.remember-row input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
 }
 
 .alert-error {
@@ -1821,6 +1846,10 @@ button.item-row:hover {
     pointer-events: none;
 }
 
+.toast.toast-error {
+    background: var(--accent-dark);
+}
+
 .toast.show {
     opacity: 1;
     transform: translate(-50%, 0);
@@ -1941,6 +1970,10 @@ button.item-row:hover {
 
     .nav-auth {
         justify-self: stretch;
+    }
+
+    form.nav-auth .btn {
+        width: 100%;
     }
 
     .home-grid,
