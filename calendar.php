@@ -4,6 +4,7 @@
  * ------------------------------------------------------------
  * Left: month calendar (built by js/script.js).
  * Right: list of events for the month or for the clicked day.
+ * Clicking an event opens its Event Details pop-up.
  * ------------------------------------------------------------
  */
 $pageTitle  = 'Calendar';
@@ -17,12 +18,13 @@ $calendarEvents = [];
 foreach ($events as $event) {
     $club = findClub($clubs, $event['club_id']);
     $calendarEvents[] = [
-        'id'       => $event['id'],
-        'title'    => $event['title'],
-        'club'     => $club ? $club['name'] : '',
-        'date'     => $event['date'],               // format: YYYY-MM-DD
-        'time'     => niceTime($event['time']),
+        'id'       => (int) $event['event_id'],
+        'title'    => $event['event_name'],
+        'club'     => $club ? $club['club_name'] : '',
+        'date'     => $event['event_date'],         // format: YYYY-MM-DD
+        'time'     => niceTime($event['event_time']),
         'location' => $event['location'],
+        'going'    => in_array($event['event_id'], $rsvpEventIds),
     ];
 }
 
@@ -33,7 +35,7 @@ require 'includes/header.php';
 
     <div class="page-head animate">
         <h1 class="page-title">Calendar</h1>
-        <p class="page-subtitle">Dark days have events. Click a day to see what's on.</p>
+        <p class="page-subtitle">Dark days have events. Click a day to see what's on, or an event for details.</p>
     </div>
 
     <div class="calendar-layout">
@@ -77,5 +79,7 @@ require 'includes/header.php';
 <script>
     window.CALENDAR_EVENTS = <?= json_encode($calendarEvents, JSON_HEX_TAG | JSON_HEX_AMP) ?>;
 </script>
+
+<?php require 'includes/event_modals.php'; ?>
 
 <?php require 'includes/footer.php'; ?>

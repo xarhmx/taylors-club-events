@@ -1,23 +1,29 @@
 /* ============================================================
    Taylor's Club Events - Front-end JavaScript
    ------------------------------------------------------------
-   1. Mobile navigation menu
-   2. Show / hide password (login page)
-   3. Follow / unfollow buttons (clubs page)
-   4. Club category filter (clubs page)
-   5. Event calendar (calendar page)
+   1.  Mobile navigation menu
+   2.  Password fields (show/hide, "passwords match" check)
+   3.  Pop-ups (club details, event details, add/edit event)
+   4.  Forms: delete confirmation + demo mode
+   5.  Club category filter (clubs page)
+   6.  Organiser: edit club details in place (clubs page)
+   7.  Profile photo pop-up (edit profile page)
+   8.  Event calendar (calendar page)
    ============================================================ */
 
-// While the back-end is not ready, follow buttons only change on screen.
-// When actions/follow_club.php works, set this to false so the form is
-// really submitted to PHP.
+// While the back-end is not ready, forms that point to actions/*.php are
+// NOT sent. Instead the page just shows what would happen (e.g. the Follow
+// button changes). When the PHP files in actions/ work, set this to false.
 const FRONTEND_ONLY = true;
 
 document.addEventListener('DOMContentLoaded', function () {
     initMobileMenu();
-    initPasswordToggle();
-    initFollowButtons();
+    initPasswordFields();
+    initPopups();
+    initForms();
     initClubFilter();
+    initClubEditing();
+    initPhotoPopup();
     initCalendar();
 });
 
@@ -35,8 +41,9 @@ function initMobileMenu() {
 }
 
 
-/* ---------- 2. Show / hide password ---------- */
-function initPasswordToggle() {
+/* ---------- 2. Password fields ---------- */
+function initPasswordFields() {
+    // Show / hide button
     document.querySelectorAll('.toggle-password').forEach(function (button) {
         button.addEventListener('click', function () {
             const input = document.getElementById(button.dataset.target);
@@ -45,29 +52,156 @@ function initPasswordToggle() {
             button.textContent = hidden ? 'Hide' : 'Show';
         });
     });
+
+    // Register page: "Confirm" must match "Password"
+    const password = document.getElementById('password');
+    const confirmBox = document.getElementById('confirm_password');
+    if (password && confirmBox) {
+        const check = function () {
+            confirmBox.setCustomValidity(
+                confirmBox.value && confirmBox.value !== password.value ? 'Passwords do not match.' : ''
+            );
+        };
+        password.addEventListener('input', check);
+        confirmBox.addEventListener('input', check);
+    }
 }
 
 
-/* ---------- 3. Follow / unfollow buttons ---------- */
-function initFollowButtons() {
-    document.querySelectorAll('.follow-form').forEach(function (form) {
-        form.addEventListener('submit', function (event) {
-            if (!FRONTEND_ONLY) return; // let PHP handle it
+/* ---------- 3. Pop-ups ---------- */
+// Any element with data-open="some-id" opens <dialog id="some-id">.
+// Any element with data-close inside a pop-up closes it.
+function openPopup(id) {
+    const popup = document.getElementById(id);
+    if (!popup || typeof popup.showModal !== 'function') return;
 
+    // Only one pop-up at a time (e.g. club details -> event details)
+    document.querySelectorAll('dialog.popup[open]').forEach(d => d.close());
+    popup.showModal();
+}
+
+function initPopups() {
+    // Works for buttons added later too (e.g. calendar events)
+    document.addEventListener('click', function (event) {
+        const opener = event.target.closest('[data-open]');
+        if (opener) {
             event.preventDefault();
-            const button = form.querySelector('.btn-follow');
-            const actionInput = form.querySelector('input[name="action"]');
-            const nowFollowing = !button.classList.contains('is-following');
+            openPopup(opener.dataset.open);
+            return;
+        }
+        const closer = event.target.closest('[data-close]');
+        if (closer) {
+            const popup = closer.closest('dialog');
+            if (popup) popup.close();
+        }
+    });
 
-            button.classList.toggle('is-following', nowFollowing);
-            button.textContent = nowFollowing ? 'Following ✓' : 'Follow+';
-            actionInput.value = nowFollowing ? 'unfollow' : 'follow';
+    // Clicking the dark area outside a pop-up closes it
+    document.querySelectorAll('dialog.popup').forEach(function (popup) {
+        popup.addEventListener('click', function (event) {
+            if (event.target !== popup) return;
+            const box = popup.getBoundingClientRect();
+            const outside = event.clientX < box.left || event.clientX > box.right ||
+                            event.clientY < box.top || event.clientY > box.bottom;
+            if (outside) popup.close();
         });
+    });
+
+    // Open a pop-up from the link, e.g. clubs.php?club=3 or calendar.php?event=5
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('event')) {
+        openPopup('event-' + params.get('event'));
+    } else if (params.has('club')) {
+        const id = params.get('club');
+        if (document.getElementById('club-' + id)) {
+            openPopup('club-' + id);
+        } else {
+            // Organiser's own club has no pop-up: scroll to its card instead
+            const card = document.getElementById('club-card-' + id);
+            if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+}
+
+
+/* ---------- 4. Forms ---------- */
+function initForms() {
+    document.addEventListener('submit', function (event) {
+        const form = event.target;
+
+        // "Are you sure?" for deleting
+        if (form.dataset.confirm && !window.confirm(form.dataset.confirm)) {
+            event.preventDefault();
+            return;
+        }
+
+        // Only forms that go to actions/*.php are affected by demo mode
+        if (!FRONTEND_ONLY || !form.getAttribute('action').startsWith('actions/')) return;
+        event.preventDefault();
+
+        if (form.classList.contains('follow-form')) {
+            demoFollow(form);
+        } else if (form.classList.contains('rsvp-form')) {
+            demoRsvp(form);
+        } else if (form.classList.contains('club-edit-form')) {
+            demoSaveClub(form);
+        } else {
+            showToast('Looks good! This will be saved once the back-end is connected.');
+            const popup = form.closest('dialog');
+            if (popup) popup.close();
+        }
     });
 }
 
+function demoFollow(form) {
+    const button = form.querySelector('.btn-follow');
+    const actionInput = form.querySelector('input[name="action"]');
+    const nowFollowing = !button.classList.contains('is-following');
 
-/* ---------- 4. Club category filter ---------- */
+    button.classList.toggle('is-following', nowFollowing);
+    button.textContent = nowFollowing ? 'Following ✓' : 'Follow+';
+    actionInput.value = nowFollowing ? 'unfollow' : 'follow';
+}
+
+function demoRsvp(form) {
+    const button = form.querySelector('.btn-rsvp');
+    const actionInput = form.querySelector('input[name="action"]');
+    const counter = form.closest('dialog').querySelector('.going-count');
+    const nowGoing = !button.classList.contains('is-going');
+
+    button.classList.toggle('is-going', nowGoing);
+    button.classList.toggle('btn-primary', !nowGoing);
+    button.textContent = nowGoing ? 'Going ✓ · Cancel RSVP' : 'RSVP';
+    actionInput.value = nowGoing ? 'cancel' : 'rsvp';
+    counter.textContent = Number(counter.textContent) + (nowGoing ? 1 : -1);
+    showToast(nowGoing ? "You're going! 🎉" : 'RSVP cancelled.');
+}
+
+function demoSaveClub(form) {
+    const card = form.closest('.club-card');
+    card.querySelector('.club-category .view-only').textContent = form.category.value;
+    card.querySelector('.club-description.view-only').textContent = form.description.value;
+    card.classList.remove('is-editing');
+    showToast('Club details updated.');
+}
+
+// Small message at the bottom of the screen
+function showToast(message) {
+    let toast = document.querySelector('.toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.setAttribute('role', 'status');
+        document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(toast.hideTimer);
+    toast.hideTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+}
+
+
+/* ---------- 5. Club category filter ---------- */
 function initClubFilter() {
     const chips = document.querySelectorAll('.filter-chip');
     const cards = document.querySelectorAll('.club-card');
@@ -89,7 +223,90 @@ function initClubFilter() {
 }
 
 
-/* ---------- 5. Event calendar ---------- */
+/* ---------- 6. Organiser: edit club details in place ---------- */
+function initClubEditing() {
+    document.querySelectorAll('[data-edit-toggle]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const card = button.closest('.club-card');
+            const editing = card.classList.toggle('is-editing');
+            if (editing) {
+                card.querySelector('textarea[name="description"]').focus();
+            } else {
+                card.querySelector('form').reset();   // Cancel = undo changes
+            }
+        });
+    });
+}
+
+
+/* ---------- 7. Profile photo pop-up ---------- */
+function initPhotoPopup() {
+    const button = document.getElementById('avatarButton');
+    const popup = document.getElementById('photoPopup');
+    if (!button || !popup) return;
+
+    const input = document.getElementById('photoInput');
+    const preview = document.getElementById('avatarPreview');
+    const fileName = document.getElementById('photoFileName');
+    const deleteBox = popup.querySelector('input[name="delete_photo"]');
+    const originalPhoto = preview.innerHTML;
+    const defaultIcon = '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4.2"/>' +
+                        '<path d="M3.5 21c0-4.4 3.8-7.5 8.5-7.5s8.5 3.1 8.5 7.5z"/></svg>';
+    const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+
+    function setOpen(open) {
+        popup.hidden = !open;
+        button.setAttribute('aria-expanded', open);
+    }
+
+    button.addEventListener('click', () => setOpen(popup.hidden));
+
+    // Close when clicking anywhere else
+    document.addEventListener('click', function (event) {
+        if (!popup.hidden && !popup.contains(event.target) && !button.contains(event.target)) {
+            setOpen(false);
+        }
+    });
+
+    // Check the chosen file and show a preview
+    input.addEventListener('change', function () {
+        const file = input.files[0];
+        if (!file) return;
+
+        if (!['image/jpeg', 'image/png'].includes(file.type)) {
+            showToast('Please choose a JPG or PNG image.');
+            input.value = '';
+            return;
+        }
+        if (file.size > MAX_SIZE) {
+            showToast('That photo is over 2MB. Please choose a smaller one.');
+            input.value = '';
+            return;
+        }
+
+        deleteBox.checked = false;
+        fileName.textContent = 'Selected: ' + file.name;
+        preview.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.alt = '';
+        preview.appendChild(img);
+    });
+
+    // "Delete current profile photo?"
+    deleteBox.addEventListener('change', function () {
+        if (deleteBox.checked) {
+            input.value = '';
+            fileName.textContent = '';
+            preview.innerHTML = defaultIcon;
+        } else {
+            preview.innerHTML = originalPhoto;
+        }
+    });
+}
+
+
+/* ---------- 8. Event calendar ---------- */
 function initCalendar() {
     const root = document.getElementById('calendar');
     if (!root) return;
@@ -231,26 +448,38 @@ function initCalendar() {
             const ul = document.createElement('ul');
             eventsByDate[key].forEach(function (ev) {
                 const li = document.createElement('li');
-                const link = document.createElement('a');
-                link.className = 'event-item';
-                link.href = 'event.php?id=' + encodeURIComponent(ev.id);
 
-                const text = document.createElement('div');
+                // Button that opens the Event Details pop-up
+                const item = document.createElement('button');
+                item.type = 'button';
+                item.className = 'event-item';
+                item.dataset.open = 'event-' + ev.id;
+
+                const text = document.createElement('span');
                 text.className = 'item-text';
-                const name = document.createElement('p');
+                const name = document.createElement('span');
                 name.className = 'item-name';
                 name.textContent = ev.title;
-                const meta = document.createElement('p');
+                const meta = document.createElement('span');
                 meta.className = 'item-meta';
                 meta.textContent = ev.club + ' · ' + ev.time + ' · ' + ev.location;
                 text.append(name, meta);
 
+                if (ev.going) {
+                    const tag = document.createElement('span');
+                    tag.className = 'going-tag';
+                    tag.textContent = 'Going';
+                    item.append(text, tag);
+                } else {
+                    item.append(text);
+                }
+
                 const arrow = document.createElement('span');
                 arrow.className = 'arrow';
                 arrow.textContent = '→';
+                item.append(arrow);
 
-                link.append(text, arrow);
-                li.appendChild(link);
+                li.appendChild(item);
                 ul.appendChild(li);
             });
             group.appendChild(ul);

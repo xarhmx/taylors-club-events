@@ -50,7 +50,7 @@ $error = $_GET['error'] ?? '';
             <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
 
-        <form action="actions/login_process.php" method="POST" novalidate>
+        <form action="actions/login_process.php" method="POST">
             <!-- Tells the back-end which type of account is logging in -->
             <input type="hidden" name="role" value="<?= $role ?>">
 
@@ -75,7 +75,7 @@ $error = $_GET['error'] ?? '';
                 <button type="submit" class="btn btn-dark">Login</button>
                 <br>
                 <a href="<?= $switchLink ?>" class="switch-role"><?= $switchText ?></a>
-                <p class="auth-footnote">Don't have an account? <a href="register.php">Register</a></p>
+                <p class="auth-footnote">Don't have an account? <a href="register.php<?= $isOrganiser ? '?role=organiser' : '' ?>">Register</a></p>
             </div>
         </form>
     </div>

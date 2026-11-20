@@ -4,6 +4,7 @@
  * ------------------------------------------------------------
  * Welcome section + three panels:
  *   Featured Clubs & Societies | Upcoming events | Following Clubs
+ * Clicking an event opens its Event Details pop-up.
  * ------------------------------------------------------------
  */
 $pageTitle  = 'Home';
@@ -14,7 +15,7 @@ require 'includes/sample_data.php';   // TODO (back-end): replace with database 
 
 $featuredClubs  = array_slice($clubs, 0, 5);
 $upcoming       = array_slice(upcomingEvents($events), 0, 5);
-$followingClubs = array_filter($clubs, fn($c) => in_array($c['id'], $currentUser['followed_club_ids']));
+$followingClubs = array_filter($clubs, fn($c) => in_array($c['club_id'], $followedClubIds));
 
 require 'includes/header.php';
 ?>
@@ -40,10 +41,10 @@ require 'includes/header.php';
                 <ul class="item-list">
                     <?php foreach ($featuredClubs as $club): ?>
                         <li>
-                            <a class="item-row" href="club.php?id=<?= $club['id'] ?>">
-                                <span class="club-avatar" style="--hue: <?= ($club['id'] * 53) % 360 ?>"><?= initials($club['name']) ?></span>
+                            <a class="item-row" href="clubs.php?club=<?= (int) $club['club_id'] ?>">
+                                <span class="club-avatar" style="--hue: <?= clubHue($club['club_id']) ?>"><?= initials($club['club_name']) ?></span>
                                 <span class="item-text">
-                                    <span class="item-name"><?= e($club['name']) ?></span>
+                                    <span class="item-name"><?= e($club['club_name']) ?></span>
                                     <span class="item-meta"><?= e($club['category']) ?></span>
                                 </span>
                             </a>
@@ -65,16 +66,16 @@ require 'includes/header.php';
                         <?php foreach ($upcoming as $event): ?>
                             <?php $club = findClub($clubs, $event['club_id']); ?>
                             <li>
-                                <a class="item-row" href="event.php?id=<?= $event['id'] ?>">
+                                <button type="button" class="item-row" data-open="event-<?= (int) $event['event_id'] ?>">
                                     <span class="date-badge">
-                                        <span class="day"><?= date('j', strtotime($event['date'])) ?></span>
-                                        <span class="month"><?= date('M', strtotime($event['date'])) ?></span>
+                                        <span class="day"><?= date('j', strtotime($event['event_date'])) ?></span>
+                                        <span class="month"><?= date('M', strtotime($event['event_date'])) ?></span>
                                     </span>
                                     <span class="item-text">
-                                        <span class="item-name"><?= e($event['title']) ?></span>
-                                        <span class="item-meta"><?= e($club['name']) ?> · <?= niceTime($event['time']) ?></span>
+                                        <span class="item-name"><?= e($event['event_name']) ?></span>
+                                        <span class="item-meta"><?= e($club['club_name']) ?> · <?= niceTime($event['event_time']) ?></span>
                                     </span>
-                                </a>
+                                </button>
                             </li>
                         <?php endforeach; ?>
                     </ul>
@@ -93,10 +94,10 @@ require 'includes/header.php';
                     <ul class="item-list">
                         <?php foreach ($followingClubs as $club): ?>
                             <li>
-                                <a class="item-row" href="club.php?id=<?= $club['id'] ?>">
-                                    <span class="club-avatar" style="--hue: <?= ($club['id'] * 53) % 360 ?>"><?= initials($club['name']) ?></span>
+                                <a class="item-row" href="clubs.php?club=<?= (int) $club['club_id'] ?>">
+                                    <span class="club-avatar" style="--hue: <?= clubHue($club['club_id']) ?>"><?= initials($club['club_name']) ?></span>
                                     <span class="item-text">
-                                        <span class="item-name"><?= e($club['name']) ?></span>
+                                        <span class="item-name"><?= e($club['club_name']) ?></span>
                                         <span class="item-meta"><?= e($club['category']) ?></span>
                                     </span>
                                 </a>
@@ -110,5 +111,7 @@ require 'includes/header.php';
 
     </div>
 </div>
+
+<?php require 'includes/event_modals.php'; ?>
 
 <?php require 'includes/footer.php'; ?>
