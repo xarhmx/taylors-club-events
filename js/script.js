@@ -11,6 +11,14 @@
    8.  Event calendar (calendar page)
    ============================================================ */
 
+// CACHE: if Chrome shows this page from its back/forward memory (e.g. pressing
+// Back after logging out), reload it from the server so it is never out of date.
+window.addEventListener('pageshow', function (event) {
+    if (event.persisted) {
+        window.location.reload();
+    }
+});
+
 document.addEventListener('DOMContentLoaded', function () {
     initMobileMenu();
     initPasswordFields();
