@@ -11,7 +11,7 @@
 
 <footer class="site-footer">
     <div class="container footer-inner">
-        <p>&copy; <?= date('Y') ?> Taylor's Club Events &middot; Discover, follow and join campus clubs.</p>
+        <p>&copy; <?= date('Y') ?> Taylor's Clubopedia &middot; Discover, follow and join campus clubs.</p>
         <ul class="footer-links">
             <li><a href="index.php">Home</a></li>
             <li><a href="clubs.php">Clubs</a></li>

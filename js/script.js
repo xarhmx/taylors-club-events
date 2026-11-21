@@ -1,5 +1,5 @@
 /* ============================================================
-   Taylor's Club Events - Front-end JavaScript
+   Taylor's Clubopedia - Front-end JavaScript
    ------------------------------------------------------------
    1.  Mobile navigation menu
    2.  Password fields (show/hide, "passwords match" check)

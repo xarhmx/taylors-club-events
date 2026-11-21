@@ -23,7 +23,7 @@ $old   = takeOldInput();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register | Taylor's Club Events</title>
+    <title>Register | Taylor's Clubopedia</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -37,7 +37,7 @@ $old   = takeOldInput();
                 <img src="images/logo.png" alt="Taylor's University" class="auth-logo">
             </a>
             <h1 class="auth-title">Create your account</h1>
-            <p class="auth-subtitle">Join Taylor's Club Events to follow clubs and RSVP to events.</p>
+            <p class="auth-subtitle">Join Taylor's Clubopedia to follow clubs and RSVP to events.</p>
         </div>
 
         <?php if ($flash['message'] !== ''): ?>

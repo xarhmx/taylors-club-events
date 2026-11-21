@@ -1,5 +1,5 @@
 -- ============================================================
--- Taylor's Club Events - database
+-- Taylor's Clubopedia - database
 -- ------------------------------------------------------------
 -- Import in phpMyAdmin: Import tab -> choose this file -> Go.
 -- It creates the database, all tables and sample data.

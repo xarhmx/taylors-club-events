@@ -35,7 +35,7 @@ function asset($path)
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= e($pageTitle) ?> | Taylor's Club Events</title>
+    <title><?= e($pageTitle) ?> | Taylor's Clubopedia</title>
 
     <!-- Inter font (same font used in the Figma design) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -56,7 +56,7 @@ function asset($path)
     <nav class="navbar container">
         <a href="index.php" class="brand" aria-label="Home">
             <img src="images/logo.png" alt="" class="brand-logo">
-            <span class="brand-text">Club<strong>Events</strong></span>
+            <span class="brand-text">Club<strong>opedia</strong></span>
         </a>
 
         <!-- Hamburger button (only visible on small screens) -->
