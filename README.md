@@ -123,9 +123,9 @@ Unique keys stop duplicate follows, RSVPs and reviews, and deleting an event aut
 
 | Name | Role |
 |------|------|
-|      | Front-end development and integration |
-|      | Back-end development |
-|      | UI/UX design (Figma) |
-|      |  |
+| Ariz & Frank | Front-end development |
+| Ariz & Hamza | Back-end development |
+| Frank | UI/UX design (Figma) |
+| Ariz & Hamza | Database |
 
 ITS64504 Web Application Programming · Taylor's University · 2026
